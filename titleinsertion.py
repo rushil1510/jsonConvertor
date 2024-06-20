@@ -10,10 +10,9 @@ def add_titles_and_filter(obj, parent_key=None):
             if required_found:
                 # Skip any key that comes after "required"
                 continue
-            if key == "required":
-                required_found = True
-                # You can include "required" in the new_dict if you don't want to remove it entirely
-                new_dict[key] = value
+            if key == "required" and value == []:
+                # Skip "required" if its value is an empty list
+                continue
             elif key == "type" and parent_key:
                 # Insert "title" after "type"
                 new_dict[key] = value
@@ -27,13 +26,23 @@ def add_titles_and_filter(obj, parent_key=None):
     else:
         return obj
 
-
 # Example JSON
 json_data = {
-    "insert your data":"here"
+    "insert your": "json data here"
 }
+
 transformed_data = add_titles_and_filter(json_data)
 
+def remove_required_key(obj):
+    if isinstance(obj, dict):
+        return {k: remove_required_key(v) for k, v in obj.items() if k != "required"}
+    elif isinstance(obj, list):
+        return [remove_required_key(elem) for elem in obj]
+    else:
+        return obj
+
+# Assuming transformed_data is your JSON-like dictionary
+transformed_data = remove_required_key(transformed_data)
 
 directory = "C:\\jsonCleaner"
 if not os.path.exists(directory):
